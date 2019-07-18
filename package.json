@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
+    "dependencies": "0.0.1",
+    "peer": "^0.2.10",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1"
   },
