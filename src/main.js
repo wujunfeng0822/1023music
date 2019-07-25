@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
+import axios from 'axios'
 import store from './store'
 import router from './router'
 import fastClick from 'fastclick'
@@ -12,6 +13,9 @@ import VueAwesomeSwiper from 'vue-awesome-swiper'
 
 fastClick.attach(document.body)
 Vue.use(VueAwesomeSwiper)
+
+Vue.prototype.$axios = axios
+Vue.prototype.baseURL = process.env.API_ROOT
 
 Vue.config.productionTip = false
 
