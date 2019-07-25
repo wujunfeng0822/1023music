@@ -15,8 +15,7 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-  .home {
-    color: pink;
-  }
+<style lang="stylus" scoped>
+  .home
+    color pink
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div>搜索</div>
+  <div>音乐搜索</div>
 </template>
 
 <script>
@@ -8,6 +8,6 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="stylus" scoped>
 
 </style>
