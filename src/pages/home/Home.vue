@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <div>导航</div>
+    <!-- <div>导航</div> -->
     <router-view></router-view>
   </div>
 </template>

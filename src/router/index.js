@@ -9,6 +9,7 @@ import FoundMusic from '@/pages/home/components/FoundMusic'
 import MusicSearch from '@/pages/home/components/MusicSearch'
 import MyAccount from '@/pages/home/components/MyAccount'
 import MusicPlayback from '@/pages/home/components/MusicPlayback'
+import Play from '@/pages/home/components/Play'
 
 Vue.use(Router)
 
@@ -17,7 +18,7 @@ export default new Router({
     {
       path: '/',
       name: 'login',
-      component: Login
+      component: Login      
     }, {
       path: '/home',
       component: Home,
@@ -49,6 +50,10 @@ export default new Router({
         path: '/my-account',
         name: 'MyAccount',
         component: MyAccount
+      },{
+        path: '/play/:id',
+        name: 'Play',
+        component: Play
       }]
     }
   ]
