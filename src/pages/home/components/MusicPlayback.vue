@@ -1,17 +1,10 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" :style="{'background-image': 'url('+picUrl+')'}">
     <div class="content">
-      <button @click="initAndPlay">init</button>
-      <button @click="pauseMusic">pause</button>
-      <button @click="playMusic">play</button>
-      <button @click="setTime">setTime 10</button>
-      <button @click="getDur">getDur</button>
-      <button @click="getBuf">getBuf</button>
-      <button @click="check">check</button>
       <!-- 顶部 -->
-      <head_bar :songName="'深绿'" :artist="'AJICO'"></head_bar>
+      <head_bar :songName="songName" :songArtists="songArtists"></head_bar>
       <!-- 留声机，用isPause控制 -->
-      <lyric_bg :isPause="isPause"></lyric_bg>
+      <lyric_bg :isPause="isPause" :picUrl="picUrl"></lyric_bg>
       <!-- 控制台，fiexed -->
       <control>
         <!-- 未实现 -->
@@ -29,7 +22,12 @@
         </template>
         <!-- 播放器 -->
         <template #control_player>
-          <control_player :isPause="isPause" @pauseChange="handlePauseChange"></control_player>
+          <control_player
+            :isPause="isPause"
+            @pauseChange="handlePauseChange"
+            @modeChange="handleModeChange"
+            @switchSong="handleSwitchSong"
+          ></control_player>
         </template>
       </control>
     </div>
@@ -44,6 +42,7 @@ import control_more from "./MusicPlayback_components/Playback_control_more";
 import control_process from "./MusicPlayback_components/Playback_control_process";
 import control_player from "./MusicPlayback_components/Playback_control_player";
 
+import { mapState, mapGetters } from "vuex";
 export default {
   name: "MusicPlayback",
   components: {
@@ -61,90 +60,213 @@ export default {
       bufferedTime: 0,
       audioDuration: 0,
       isEnd: false,
-      isPause: false,
-      ischeck:false
+      isPause: true,
+      mode: 0,
+      picUrl: "",
+      songName: "",
+      songArtists: []
     };
   },
+  computed: {
+    ...mapState({
+      currentTracks: "currentTracks",
+      currentSong: "currentSong",
+      songIndex: "songIndex",
+      songStroage: "songStroage"
+    })
+  },
   methods: {
-    initAndPlay() {
-      // <初始化Audio对象，并自动播放>
-      this.currentAudio = new Audio();
-      this.currentAudio.src =
-        "http://m10.music.126.net/20190729002534/625c7c2bcf3adf8a5338d047e304f4e4/ymusic/0a53/1b3f/69d2/54f6071555f341c012afcee79aa04800.mp3";
-      this.currentAudio.play();
-      this.isPause = false;
-      this.currentAudio.volume = 1;
+    initAudio() {
+      if (this.currentSong === null) {
+        return;
+      } else {
+        // <初始化Audio对象，并自动播放>
+        this.currentAudio = new Audio();
+        this.currentAudio.volume = 1;
 
-      // 刷新歌曲缓存时间长度
-      this.currentAudio.addEventListener("progress", () => {
-        const timeRange = this.currentAudio.buffered;
-        if (timeRange.length > 0){
-          this.bufferedTime = timeRange.end(timeRange.length - 1);
-          console.log("buffedTime",timeRange.end(timeRange.length - 1));
-        }
-      });
-      // 获取歌曲时长：只能在加载了之后才能获取
-      this.currentAudio.addEventListener("durationchange", () => {
-        this.audioDuration = this.currentAudio.duration;
-      });
-      // 刷新currentTime
-      this.currentAudio.addEventListener("timeupdate", e => {
-        this.audioCurrentTime = e.path[0].currentTime;
-      });
-      // 更新isEnd
-      this.currentAudio.addEventListener("ended", () => {
-        console.log("歌曲播放完");
-        this.isEnd = true;
-      });
+        // 监听播放
+        this.currentAudio.addEventListener("playing", this.handlePlaying);
+        // 监听停止
+        this.currentAudio.addEventListener("pause", this.handlePause);
+        // 歌曲多次加载触发,刷新歌曲已缓存时间长度 bufferedTime
+        this.currentAudio.addEventListener("progress", this.handleProgress);
+        // 歌曲首次加载后触发（单次），获取歌曲时长，更新 audioDuration
+        this.currentAudio.addEventListener(
+          "durationchange",
+          this.handleDurationchange
+        );
+        // 播放时间发生变化触发，更新 audioCurrentTime
+        this.currentAudio.addEventListener("timeupdate", this.handleTimeupdate);
+        // 播放到曲终触发，更新 isEnd
+        this.currentAudio.addEventListener("ended", this.handleEnded);
+      }
+    },
+    setAndPlay() {
+      // <设置或切换歌曲并播放，activaed阶段>
+      if (
+        this.currentSong === null ||
+        !this.$route.params.needSet ||
+        this.$route.params.isSame
+      ) {
+        return;
+      } else {
+        this.setSong();
+      }
+    },
+    setSong() {
+      let songSrc = `https://music.163.com/song/media/outer/url?id=${this.currentSong.id}.mp3`;
+      this.picUrl = this.currentSong.al.picUrl;
+      this.songName = this.currentSong.name || "";
+      this.songArtists = this.currentSong.ar || [];
+      this.currentAudio.src = songSrc;
+      this.currentAudio.play();
+    },
+    // 以下是audio对象的回调监听
+    handlePlaying() {
+      // 歌曲成功播放触发
+      this.isPause = false;
+    },
+    handlePause() {
+      // 歌曲暂停时触发
+      this.isPause = true;
+    },
+    handleProgress() {
+      // 缓存变化，获取缓存
+      const timeRange = this.currentAudio.buffered;
+      if (timeRange.length > 0) {
+        this.bufferedTime = timeRange.end(timeRange.length - 1);
+      }
+    },
+    handleDurationchange() {
+      // 歌曲src绑定，获取duration
+      this.audioDuration = this.currentAudio.duration;
+    },
+    handleTimeupdate(e) {
+      // 歌曲播放时间持续变化
+      this.audioCurrentTime = e.path[0].currentTime;
+    },
+    handleEnded() {
+      // <播放到终点，走切歌逻辑>
+      this.handleSwitchSong(true);
+      this.isEnd = true;
+    },
+    pauseAndDestroy() {
+      if (this.currentAudio === null) {
+        return;
+      }
+      // 销毁audio
+      this.currentAudio.pause();
+      // 监听播放
+      this.currentAudio.removeEventListener("playing", this.handlePlaying);
+      // 监听停止
+      this.currentAudio.removeEventListener("pause", this.handlePause);
+      // 歌曲多次加载触发,刷新歌曲已缓存时间长度 bufferedTime
+      this.currentAudio.removeEventListener("progress", this.handleProgress);
+      // 歌曲首次加载后触发（单次），获取歌曲时长，更新 audioDuration
+      this.currentAudio.removeEventListener(
+        "durationchange",
+        this.handleDurationchange
+      );
+      // 播放时间发生变化触发，更新 audioCurrentTime
+      this.currentAudio.removeEventListener(
+        "timeupdate",
+        this.handleTimeupdate
+      );
+      // 播放到曲终触发，更新 isEnd
+      this.currentAudio.removeEventListener("ended", this.handleEnded);
+      this.currentAudio = null;
+    },
+    // 以下是响应组件control的回调
+    handleCurrentTimeChange(currentTimeSet) {
+      // <接收并设置当前时间，来自子组件control_process>
+      this.currentAudio.currentTime = currentTimeSet;
     },
     handlePauseChange(val) {
       // <接收并更新暂停状态，来自子组件control_player>
       this.isPause = val;
     },
-    handleCurrentTimeChange(currentTimeSet) {
-      // <接收并设置当前时间，来自子组件control_process>
-      this.currentAudio.currentTime = currentTimeSet;
+    handleModeChange(mode) {
+      this.mode = mode;
     },
-    pauseMusic() {
-      this.currentAudio.pause();
-      this.isPause = true;
-    },
-    playMusic() {
-      this.currentAudio.play();
-    },
-    stopAndDestroy(){
-      // 销毁audio
-    },
-    // 以下是暂时的测试方法
-    setTime() {
-      this.currentAudio.currentTime = 180;
-    },
-    getDur() {
-      console.log(this.currentAudio.duration);
-    },
-    check(){
-      const arr =['http://m10.music.126.net/20190729031919/7c7c98722c1f521ede12ddb61b975204/ymusic/e53a/156b/38ab/680d41f97a3b5acd32cdb77839ff0d9f.mp3','http://m10.music.126.net/20190729002534/625c7c2bcf3adf8a5338d047e304f4e4/ymusic/0a53/1b3f/69d2/54f6071555f341c012afcee79aa04800.mp3'];
-      this.currentAudio.src=this.ischeck ? arr[0]:arr[1];
-      this.currentAudio.play();
-      this.ischeck = !this.ischeck;
-    },
-    getBuf() {
-      const timeRange = this.currentAudio.buffered;
-      console.log(timeRange.end(timeRange.length - 1));
+    handleSwitchSong(auto, position) {
+      // <切换当前歌曲>
+      // auto：曲终自动切换，是真，否假
+      // position：主动切换，下一首真，上一首假
+
+      // 保存一次指针
+      let currentSongIndex = this.songIndex;
+      // 下一首歌曲指针
+      let nextSongIndex;
+
+      // 判断当前播放模式
+      // 0列表循环、1列表随机、2单曲循环
+      this.mode === 1
+        ? (nextSongIndex = Math.floor(
+            Math.random() * this.currentTracks.length
+          ))
+        : (nextSongIndex = currentSongIndex + 1);
+
+      // 如果是曲终自动切歌的时候
+      if (auto) {
+        if (this.mode === 2) {
+          this.currentAudio.currentTime = 0;
+          this.currentAudio.play();
+        } else {
+          // 切换当前歌曲
+          this.$store.dispatch("changeCurrentSongByIndex", { nextSongIndex });
+          // 设置当前歌曲播放
+          this.setSong();
+        }
+        return;
+      }
+      // 如果是手动切歌的时候
+      if (position) {
+        // 下一首
+        // 同上，使用指针切歌
+        this.$store.dispatch("changeCurrentSongByIndex", {
+          nextSongIndex: nextSongIndex
+        });
+        this.setSong();
+      } else {
+        // 上一首
+        // songStroage是store中的一个历史播放队列
+        if (this.songStroage.length > 1) {
+          const backSong = this.songStroage[this.songStroage.length - 2];
+          this.$store.dispatch("update_currentSong", { currentSong: backSong });
+          const newIndex = this.songIndex - 1;
+          this.$store.dispatch("update_songIndex", { songIndex: newIndex });
+          this.setSong();
+        } else {
+          this.currentAudio.currentTime = 0;
+        }
+      }
     }
   },
   watch: {
     isPause(newVal) {
       // <监视isPause暂停状态，以此执行播放或暂停>
-      if (newVal) {
-        this.pauseMusic();
-      } else {
-        this.playMusic();
+      // audio对象未能初始化的情况不可用
+      if (this.currentAudio !== null) {
+        if (newVal) {
+          this.currentAudio.pause();
+        } else {
+          this.currentAudio.play();
+        }
       }
     }
   },
-  mounted() {},
-  beforeDestroy() {}
+  mounted() {
+    // 挂载阶段初始化一个audio对象并绑定好监听
+    this.initAudio();
+  },
+  activated() {
+    // console.log("now activatedWork!!!");
+    this.setAndPlay();
+  },
+  beforeDestroy() {
+    // 组件销毁阶段，销毁audio对象，移除监听
+    this.pauseAndDestroy();
+  }
 };
 </script>
 
@@ -163,6 +285,7 @@ export default {
   box-sizing border-box
   z-index 2
   box-shadow 0 0 1rem 2rem white inset
+  background-color black
 
   &:after
     content ''

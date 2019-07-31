@@ -1,53 +1,36 @@
 <template>
   <div class="lyric">
-    <!-- <button @click="isPause = !isPause">test</button> -->
     <img class="movebar" :style="{'transform': isPause? movebarDefault : movebarActive}" src="@/assets/MusicPlayback/img/play_movebar.png" alt />
     <div class="album-border">
-      <div class="album-content" :style="{'background-image':contentBgiURl,'transform':albumRotate}"></div>
+      <div class="album-content" :style="{'background-image':'url('+currentSongBg+')','animation-play-state':isPause?'paused':'running'}"></div>
     </div>
   </div>
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
 export default {
   name: "Playback_lyric_bg",
   props: {
-    contentBgi: {
-      type: String,
-      default:
-        "http://p1.music.126.net/98EQQmKbSfpc1tU-PYoKfA==/875211255733712.jpg"
-    },
     isPause:{
       type: Boolean,
-      default: false
+      default: true
+    },
+    picUrl:{
+      type: String,
+      default:""
     }
   },
   data() {
     return {
-      contentDeg: 0,
-      interval: null,
+      // 留声机架子两个状态
       movebarDefault:'translateX(35%) rotate(-37deg)',
       movebarActive:'translateX(35%) rotate(0deg)'
     };
   },
   computed: {
-    contentBgiURl() {
-      return `url(${this.contentBgi})`;
-    },
-    albumRotate() {
-      return `rotate(${this.contentDeg}deg)`;
-    }
-  },
-  watch: {
-    isPause(newVal) {
-      if (!newVal && this.interval === null) {
-        this.interval = setInterval(() => {
-          this.contentDeg += 1;
-        }, 50);
-      } else {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
+    currentSongBg(){
+      return this.picUrl;
     }
   }
 };
@@ -55,7 +38,14 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~@/assets/MusicPlayback/play_icon'
-
+@keyframes rotateImg {
+  0%{
+    transform rotate(0deg)
+  }
+  100%{
+    transform rotate(360deg)
+  }
+}
 .lyric
   position relative
   // background-color pink
@@ -89,6 +79,8 @@ export default {
     z-index 995
 
     .album-content
+      animation rotateImg 6s infinite linear
+      animation-play-state paused
       position absolute
       left 50%
       top 50%

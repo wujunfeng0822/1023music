@@ -28,11 +28,17 @@ export default new Router({
       }, {
         path: '/music-list',
         name: 'MusicList',
-        component: MusicList
+        component: MusicList,
+        meta:{
+          keepAlive: true
+        }
       }, {
         path: '/music-playback',
         name: 'MusicPlayback',
-        component: MusicPlayback
+        component: MusicPlayback,
+        meta:{
+          keepAlive: true
+        }
       }, {
         path: '/music-search',
         name: 'MusicSearch',

@@ -1,8 +1,12 @@
 <template>
   <div class="head">
-    <a href="#" class="icon btn-back" @click="goBack" v-if="canBack">&#xe60a;</a>
-    <p class="song_title" v-text="songName"></p>
-    <p class="song_artist" v-text="artist"></p>
+    <a class="icon btn-back" @click.prevent="goBack" v-if="canBack">&#xe60a;</a>
+    <p class="song_title">
+      <span v-text="headSongName"></span>
+    </p>
+    <p class="song_artist">
+      <span v-text="headSongArtist"></span>
+    </p>
   </div>
 </template>
 
@@ -16,19 +20,38 @@ export default {
     },
     songName: {
       type: String,
-      default: '不详'
+      default: "不详"
     },
-    artist: {
-      type: String,
-      default: '群星'
+    songArtists: {
+      type: Array,
+      default: []
     }
   },
   data() {
     return {};
   },
+  computed: {
+    headSongName() {
+      // 为空则不详
+      return this.songName === '' ? '不详': this.songName;
+    },
+    headSongArtist() {
+      // 为空则群星
+      if (this.songArtists.length > 0) {
+        let arr = [];
+        this.songArtists.forEach(item => {
+          arr.push(item.name);
+        });
+        return arr.join(" & ");
+      }else {
+        return "群星";
+      }
+    }
+  },
   methods: {
     goBack() {
       this.$router.go(-1);
+      console.log("back");
     }
   }
 };
@@ -36,6 +59,9 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~@/assets/MusicPlayback/play_icon'
+
+.icon
+  color white
 
 .head
   line-height 0.84rem
@@ -50,6 +76,12 @@ export default {
 
   p
     text-align center
+
+    span
+      display block
+      margin 0 auto
+      width 70%
+      $single-line-overflow()
 
   .song_title
     font-size 0.32rem

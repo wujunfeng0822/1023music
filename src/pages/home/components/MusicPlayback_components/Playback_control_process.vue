@@ -45,6 +45,7 @@ export default {
   },
   computed: {
     timePercent() {
+      // <使用duration和当前歌曲时间计算播放百分比>
       if (isNaN(this.duration) || this.duration === 0) {
         return 0;
       } else {
@@ -52,6 +53,7 @@ export default {
       }
     },
     buffedPercent(){
+      // <通过bufferedTime和duration计算缓存百分比>
       if (isNaN(this.duration) || this.duration === 0) {
         return 0;
       } else {
@@ -93,10 +95,10 @@ export default {
     }
   },
   mounted() {
-    console.log(this.duration, this.currentTime, this.currentPercent);
   },
   filters: {
     formatTime(val) {
+      // 播放时间过滤器
       const time = Math.floor(val);
       let min, second;
       min = Math.floor(time / 60);

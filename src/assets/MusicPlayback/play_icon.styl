@@ -1,15 +1,29 @@
 @font-face {
   font-family: 'iconfont';  /* project id 1318851 */
-  src: url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.eot');
-  src: url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.eot?#iefix') format('embedded-opentype'),
-  url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.woff2') format('woff2'),
-  url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.woff') format('woff'),
-  url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.ttf') format('truetype'),
-  url('//at.alicdn.com/t/font_1318851_6lkfz8u4cqe.svg#iconfont') format('svg');
+  src: url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.eot');
+  src: url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.woff2') format('woff2'),
+  url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.woff') format('woff'),
+  url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_1318851_b1sy6rot8gr.svg#iconfont') format('svg');
 }
 .icon{
     font-family: 'iconfont';
-    color: white !important;
 }
 
 $font = 'Avenir', 'Helvetica', 'Arial', 'sans-serif'
+
+$fontColor_Aside = #b5b5b5
+$fontColor_Default = #212121
+
+$single-line-overflow()
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+$double-line-overflow()
+    overflow:hidden; 
+    text-overflow:ellipsis;
+    display:-webkit-box; 
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2; 

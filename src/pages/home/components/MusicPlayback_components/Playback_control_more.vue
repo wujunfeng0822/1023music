@@ -11,7 +11,6 @@
 export default {
   name: "control_more",
   props:{
-    hello: String
   },
   data() {
     return {};
