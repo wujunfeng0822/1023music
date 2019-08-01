@@ -95,13 +95,15 @@ export default {
       );
     },
     toSong(currentSong, currentTracks, songIndex) {
-      let isSame;      
-      if (this.$store.state.currentSong) {        
+      // <点击歌曲跳转到播放器>
+      // 判断是否同一首歌，isSame是播放器重置歌曲的判断条件之一
+      let isSame;
+      if (this.$store.state.currentSong) {
         isSame = this.$store.state.currentSong.id === currentSong.id;
-      }else{
+      } else {
         isSame = false;
       }
-      
+      // 更新vuex 当前播放列表currentTracks、当前歌曲currentSong、当前列表指针songIndex
       this.$store.dispatch("update_currentTracks", { currentTracks });
       this.$store.dispatch("update_currentSong", { currentSong });
       this.$store.dispatch("update_songIndex", { songIndex });
@@ -109,6 +111,7 @@ export default {
       this.$router.push({
         name: "MusicPlayback",
         params: {
+          // needSet：阶段
           needSet: true,
           isSame: isSame
         }
@@ -124,7 +127,7 @@ export default {
       });
     }
   },
-  mounted() {    
+  mounted() {
     this.getMusicListById();
   }
 };

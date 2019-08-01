@@ -10,6 +10,9 @@ import './assets/styles/reset.css'
 import './assets/styles/border.css'
 import 'swiper/dist/css/swiper.css'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
+// cubeUI Component
+import { Toast } from 'cube-ui'
+Vue.use(Toast)
 
 fastClick.attach(document.body)
 Vue.use(VueAwesomeSwiper)
@@ -20,10 +23,25 @@ Vue.prototype.baseURL = process.env.API_ROOT
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
-new Vue({
+const vm = new Vue({
   el: '#app',
   store,
   router,
   components: { App },
   template: '<App/>'
-})
+});
+
+// vm.prototype.$toast = {a:'aaa'}
+
+
+// function toast({txt,type,time,mask}){
+//   const toastEle = this.$createToast({
+//     txt: txt || "Loading...",
+//     mask: mask || true ,
+//     type: type || 'loading',
+//     time: time || 0
+//   });
+//   toastEle.show();
+//   return toastEle.hide;
+// };
+

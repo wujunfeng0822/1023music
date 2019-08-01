@@ -4,6 +4,8 @@ const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 
+const PostCompilePlugin = require('webpack-post-compile-plugin')
+const TransformModulesPlugin = require('webpack-transform-modules-plugin')
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
@@ -39,6 +41,11 @@ module.exports = {
       'styles': resolve('src/assets/styles')
       }
   },
+  plugins: [
+    // ...
+    new PostCompilePlugin(),
+    new TransformModulesPlugin()
+  ],
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),
