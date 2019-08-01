@@ -4,10 +4,14 @@ import Vue from 'vue';
 Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
+        // 播放页相关的state
         currentTracks: [],
         currentSong: null,
         songIndex: null,
-        songStroage:[]
+        songStroage:[],
+
+        // 登录的状态
+        isLogin:false
     },
     getters: {
         
@@ -29,6 +33,10 @@ export default new Vuex.Store({
             
             dispatch('update_currentSong',{ currentSong });
             dispatch('update_songIndex', { songIndex: nextSongIndex });
+        },
+        // 以下是登录相关的action
+        update_login({ commit }, { isLogin }){
+            commit('Update_login',{ isLogin });
         }
     },
     mutations: {
@@ -43,6 +51,9 @@ export default new Vuex.Store({
         },
         UPDATE_songStroage(state ,{currentSong}){
             state.songStroage.push(currentSong);
+        },
+        UPDATE_login(state, { isLogin }){
+            state.isLogin = isLogin;
         }
     }
 });

@@ -31,27 +31,28 @@ export default {
       return toastEle.hide;
     },
     login() {
-      // const hide = this.toast();
       // /login/cellphone?phone=xxx&password=yyy
-      // this.$axios
-      //   .post(`api/login/cellphone`, {
-      //     phone: this.account,
-      //     password: this.password
-      //   })
-      //   .then(
-      //     res => {
-      //       if (res.data.code === 200) {
-      //         // 登录成功
-      //       } else {
-      //         // 登录失败
-      //         // error.show();
-      //       }
-      //       console.log(res);
-      //     },
-      //     err => {
-      //       console.log(err);
-      //     }
-      //   );
+      this.$axios
+        .post(`api/login/cellphone`, {
+          phone: this.account,
+          password: this.password
+        })
+        .then(
+          res => {
+            console.log(res.data);
+            
+            // if (res.data.code === 200) {
+            //   // 登录成功
+            //   console.log("success");
+            // } else {
+            //   // 登录失败
+            //   console.log(res.data.code);
+            // }
+          },
+          err => {
+            console.log(err);
+          }
+        );
     }
   }
 };
