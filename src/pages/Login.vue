@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -19,19 +20,24 @@ export default {
       password: ""
     };
   },
+  computed: {
+    lastAccount:{
+      get(){
+        this.account = this.$store.state.account;
+        return this.$store.state.account;
+      }
+    }
+  },
+  watch:{
+    lastAccount(newVal){
+    }
+  },
   methods: {
-    toast({txt,type,time,mask}) {
-      const toastEle = this.$createToast({
-        txt: txt || "Loading...",
-        mask: mask || true ,
-        type: type || 'loading',
-        time: time || 0
-      });
-      toastEle.show();
-      return toastEle.hide;
-    },
     login() {
-      // /login/cellphone?phone=xxx&password=yyy
+      if (!this.validate()) {
+        return;
+      }
+      const toastLoadingHide = this.toast({});
       this.$axios
         .post(`api/login/cellphone`, {
           phone: this.account,
@@ -39,20 +45,89 @@ export default {
         })
         .then(
           res => {
-            console.log(res.data);
-            
-            // if (res.data.code === 200) {
-            //   // 登录成功
-            //   console.log("success");
-            // } else {
-            //   // 登录失败
-            //   console.log(res.data.code);
-            // }
+            toastLoadingHide();
+            if (res.data.code === 200) {
+              // 登录成功
+              const profile = res.data.profile;
+
+              this.$store.dispatch("update_login", {
+                isLogin: true,
+                profile: profile,
+                account: this.account
+              });
+              // 路由跳转
+              this.$router.replace({
+                path: "/my-account"
+              });
+            } else {
+              // 登录失败
+              console.log(res.data.code);
+              this.toast({
+                txt: "登录失败",
+                mask: false,
+                type: "err",
+                time: 1000
+              });
+            }
           },
           err => {
+            toastLoadingHide();
             console.log(err);
+            this.toast({
+              txt: "登录失败，网络出错",
+              mask: false,
+              type: "err",
+              time: 1000
+            });
           }
         );
+    },
+    validate() {
+      //<表单验证>
+      if (this.account === "") {
+        this.toast({
+          txt: "未输入手机号",
+          time: 500,
+          mask: false,
+          type: "err"
+        });
+        return false;
+      }
+      const v = new this.$validator();
+      if (!v.isPhone(this.account)) {
+        this.toast({ txt: "手机号错误", time: 500, mask: false, type: "err" });
+        return false;
+      } else {
+        this.$axios
+          .get(`api/cellphone/existence/check?phone=${this.account}`)
+          .then(
+            res => {
+              if (res.data.exist < 0) {
+                this.toast({
+                  txt: "该手机号尚未注册",
+                  time: 500,
+                  mask: false,
+                  type: "err"
+                });
+                return false;
+              }
+            },
+            err => {
+              this.toast({
+                txt: "网络出错，请稍后尝试",
+                time: 500,
+                mask: false,
+                type: "err"
+              });
+              return false;
+            }
+          );
+      }
+      if (this.password === "") {
+        this.toast({ txt: "未输入密码", time: 500, mask: false, type: "err" });
+        return false;
+      }
+      return true;
     }
   }
 };

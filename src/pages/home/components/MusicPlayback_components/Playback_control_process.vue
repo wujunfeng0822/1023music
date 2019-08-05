@@ -123,7 +123,6 @@ export default {
   align-items center
   line-height 0.84rem
 
-  // background-color purple
   .timer
     display block
     margin 0 0.2rem
@@ -151,7 +150,7 @@ export default {
         z-index 1
       .process-current
         position relative
-        // width 50%
+        width 50%
         padding 0.02rem 0
         background-color red
         z-index 2

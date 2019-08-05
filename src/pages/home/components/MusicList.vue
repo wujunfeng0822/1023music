@@ -1,34 +1,31 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" v-show="isShow">
     <div class="head-bar">
-      <a href="#" class="icon btn-back">&#xe60a;</a>
+      <a class="icon btn-back" @click.prevent="goBack">&#xe60a;</a>
       <p class="head-title">歌单</p>
       <a class="icon btn-player" @click.prevent="toPlayBack">&#xe62a;</a>
     </div>
 
-    <div class="head-wrapper">
+    <div class="head-wrapper" v-lazy:background-image='coverImgUrl' v-show="isShow">
       <div class="head-content">
         <div class="head-left">
           <span class="info">
-            <span class="icon">&#xe60f;</span>3698
+            <span class="icon">&#xe60f;</span>
+            {{playCount}}
           </span>
-          <img
-            class="list-img"
-            :src="'http://p2.music.126.net/6zqeepGrr52aXb7D06LXww==/18751071301411304.jpg'"
-            alt
-          />
+          <img class="list-img" v-lazy="coverImgUrl" alt />
         </div>
         <div class="head-right">
           <p class="list-name">{{name}}</p>
           <div class="owner">
-            <img class="owner-avatar" :src="avatarUrl" alt />
+            <img class="owner-avatar" v-lazy="avatarUrl" alt />
             <span class="owner-name">{{nickname}}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="play-list">
+    <div class="play-list" v-show="isShow">
       <div class="list-count border-bottom">
         <div class="left">
           <span class="icon btn-play">&#xe62c;</span>
@@ -59,12 +56,16 @@
 // http://localhost:3000/playlist/detail?id=100699876
 export default {
   name: "",
+  props:{
+    query:{}
+  },
   data() {
     return {
-      id: 100699876,
+      isShow: false,
       name: "",
       coverImgUrl: "",
       subscribedCount: 0,
+      playCount: 0,
       trackCount: 0,
       tracks: [],
       nickname: "",
@@ -74,22 +75,28 @@ export default {
   },
   methods: {
     getMusicListById(id) {
-      this.$axios.get("/api/playlist/detail?id=" + this.id).then(
+      // loading...
+      this.isShow = false;
+      const hideLoading = this.toast({});
+      this.$axios.get("/api/playlist/detail?id=" + id).then(
         res => {
-          console.log(res.data);
+          hideLoading();
           const data = res.data;
           if (data.code === 200) {
             this.name = data.playlist.name;
             this.coverImgUrl = data.playlist.coverImgUrl;
             this.subscribedCount = data.playlist.subscribedCount;
+            this.playCount = data.playlist.playCount;
             this.trackCount = data.playlist.trackCount;
             this.tracks = data.playlist.tracks;
             this.userId = data.playlist.creator.userId;
             this.nickname = data.playlist.creator.nickname;
             this.avatarUrl = data.playlist.creator.avatarUrl;
+            this.isShow = true;
           }
         },
         err => {
+          hideLoading();
           console.log("err--------getMusicListById");
         }
       );
@@ -111,8 +118,6 @@ export default {
       this.$router.push({
         name: "MusicPlayback",
         params: {
-          // needSet：阶段
-          needSet: true,
           isSame: isSame
         }
       });
@@ -121,14 +126,44 @@ export default {
       this.$router.push({
         name: "MusicPlayback",
         params: {
-          needSet: false,
-          isSame: true
+          superPath: true
         }
+      });
+    },
+    goBack() {
+      this.$router.go(-1);
+    }
+  },
+  beforeRouteEnter(to, from, next) {
+    const nowFullPath = to.fullPath;
+    const cacheLastFullPath = to.meta.cacheLastFullPath;
+    if (nowFullPath === cacheLastFullPath) {
+      to.meta.isUseCache = true;
+    }
+    const isUseCache = to.meta.isUseCache;
+    if (!isUseCache) {
+      to.meta.cacheLastFullPath = nowFullPath;
+      next(vm => {
+        // 关闭底部导航
+        vm.$emit("showTabBar", false);
+        const id = vm.query.id || "000000001";
+        vm.getMusicListById(id);
+      });
+    } else {
+      to.meta.isUseCache = false;
+      next(vm => {
+        vm.$emit("showTabBar", false);
       });
     }
   },
-  mounted() {
-    this.getMusicListById();
+  beforeRouteLeave(to, from, next) {
+    this.$emit("showTabBar", true);
+    const useCacheOnlyArr = from.meta.useCacheOnly;
+    const setIsUseCache = useCacheOnlyArr.some(item => {
+      return to.path === item;
+    });
+    from.meta.isUseCache = setIsUseCache;
+    next();
   }
 };
 </script>
@@ -161,7 +196,9 @@ export default {
     display inline-block
     padding-left 0.2rem
     position absolute
-    z-index 7
+    left 0
+    top 0
+    z-index 8
 
   .btn-player
     font-size 0.32rem
@@ -183,6 +220,7 @@ export default {
   font-family $font
   background-image url('http://p2.music.126.net/6zqeepGrr52aXb7D06LXww==/18751071301411304.jpg')
   background-position center center
+  background-repeat no-repeat
   width 100%
   box-sizing border-box
   z-index 2
@@ -242,8 +280,10 @@ export default {
 
         .owner-avatar
           width 0.5rem
+          height 0.5rem
           border-radius 50%
           margin 0 0.1rem
+          background-color red
 
         .owner-name
           font-size 0.24rem

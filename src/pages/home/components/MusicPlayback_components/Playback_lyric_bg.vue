@@ -2,7 +2,7 @@
   <div class="lyric">
     <img class="movebar" :style="{'transform': isPause? movebarDefault : movebarActive}" src="@/assets/MusicPlayback/img/play_movebar.png" alt />
     <div class="album-border">
-      <div class="album-content" :style="{'background-image':'url('+currentSongBg+')','animation-play-state':isPause?'paused':'running'}"></div>
+      <div class="album-content" v-lazy:background-image="currentSongBg" :style="{'animation-play-state':isPause?'paused':'running'}"></div>
     </div>
   </div>
 </template>

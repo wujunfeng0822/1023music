@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :style="{'background-image': 'url('+picUrl+')'}">
+  <div class="wrapper" v-lazy:background-image="picUrl">
     <div class="content">
       <!-- 顶部 -->
       <head_bar :songName="songName" :songArtists="songArtists"></head_bar>
@@ -83,7 +83,9 @@ export default {
         // <初始化Audio对象，并自动播放>
         this.currentAudio = new Audio();
         this.currentAudio.volume = 1;
-
+        
+        // 这个监听器有可能解决移动端兼容问题
+        // this.currentAudio.addEventListener("canplay", this.handleCanplay);
         // 监听播放
         this.currentAudio.addEventListener("playing", this.handlePlaying);
         // 监听停止
@@ -103,21 +105,44 @@ export default {
     },
     setAndPlay() {
       // <设置或切换歌曲并播放，activaed阶段>
-      if (
-        this.currentSong === null ||
-        !this.$route.params.needSet ||
-        this.$route.params.isSame
-      ) {
+      if (this.currentSong === null) {
         return;
-      } else {
+      }
+
+      if (this.currentAudio === null) {
+        // 如果还没初始化，先初始化
+        this.initAudio();
         this.setSong();
+      } else {
+        if (this.currentAudio.src) {
+          // 如果已经有歌曲在播放
+          if (this.$route.params.isSame) {
+            // 如果是同一首歌
+            return;
+          } else {
+            // 不是同一首歌，或参数未设置
+            if (this.$route.params.superPath) {
+              // 如果是超级通道进来
+              return;
+            }
+            this.setSong();
+          }
+          return;
+        } else {
+          this.setSong();
+        }
       }
     },
     setSong() {
       let songSrc = `https://music.163.com/song/media/outer/url?id=${this.currentSong.id}.mp3`;
-      this.picUrl = this.currentSong.al.picUrl;
+      if (this.currentSong.al) {
+        this.picUrl = this.currentSong.al.picUrl;
+      }else{
+        this.picUrl = "";
+      }
+     
       this.songName = this.currentSong.name || "";
-      this.songArtists = this.currentSong.ar || [];
+      this.songArtists = this.currentSong.ar || this.currentSong.artists || [];
       this.currentAudio.src = songSrc;
       this.currentAudio.play();
     },
@@ -144,6 +169,7 @@ export default {
     handleTimeupdate(e) {
       // 歌曲播放时间持续变化
       this.audioCurrentTime = e.path[0].currentTime;
+      // alert("change! you see?");
     },
     handleEnded() {
       // <播放到终点，走切歌逻辑>
@@ -254,6 +280,15 @@ export default {
         }
       }
     }
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm=>{
+      vm.$emit('showTabBar',false);
+    })
+  },
+  beforeRouteLeave (to, from, next) {
+    this.$emit('showTabBar',true);
+    next();
   },
   mounted() {
     // 挂载阶段初始化一个audio对象并绑定好监听

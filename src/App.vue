@@ -1,11 +1,21 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <transition name="page" enter-active-class="animated zoomInUp" leave-active-class>
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'
-}
+  name: "App",
+  methods: {
+    getSessionStorage() {
+      this.$store.dispatch("getSessionStorage");
+    }
+  },
+  created() {
+    this.getSessionStorage();
+  }
+};
 </script>
