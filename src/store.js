@@ -4,6 +4,42 @@ import Vue from 'vue';
 Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
+        // 底部控制条
+        currentTabID:0,
+        tabBarList:[
+            {
+              id: 0,
+              icon: "\ue63b",
+              text: "发现音乐",
+              active: false,
+              routePath: "/found-music",
+              routeName: "FoundMusic"
+            },
+            {
+              id: 1,
+              icon: "\ue680",
+              text: "我的音乐",
+              active: false,
+              routePath: "/my-music",
+              routeName: "MyMusic"
+            },
+            {
+              id: 2,
+              icon: "\ue61a",
+              text: "朋友",
+              active: false,
+              routePath: "/music-share",
+              routeName: "MusicShare"
+            },
+            {
+              id: 3,
+              icon: "\ue618",
+              text: "账号",
+              active: false,
+              routePath: "/my-account",
+              routeName: "MyAccount"
+            }
+          ],
         // 播放页相关的state
         currentTracks: [],
         currentSong: null,
@@ -21,6 +57,10 @@ export default new Vuex.Store({
         }
     },
     actions: {
+        // update_currentTabID()
+        update_tabBarList( { commit }, { tabBarList }){
+            commit('UPDATE_tabBarList',{ tabBarList });
+        },
         // 初始、刷新获取sessionStorage
         getSessionStorage({ commit, state }) {
             const currentTracks = JSON.parse(sessionStorage.getItem('currentTracks')) || state.currentTracks;
@@ -61,6 +101,9 @@ export default new Vuex.Store({
         }
     },
     mutations: {
+        UPDATE_tabBarList(state, { tabBarList }){
+            state.tabBarList = tabBarList;
+        },
         GET_SessionStroage(state, { currentTracks, currentSong, songIndex, songStroage, isLogin, account, profile }) { 
             state.currentTracks = currentTracks;
             state.currentSong = currentSong;

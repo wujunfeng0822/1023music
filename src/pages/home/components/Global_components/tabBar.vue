@@ -16,66 +16,27 @@
 <script>
 export default {
   props: {
-    currentPageID: {
-      type: Number,
-      default: 0
+    tabBarList:{
+      type:Array,
+      default:[]
     }
   },
   name: "tabBar",
   data() {
     return {
-      list: [
-        {
-          id: 0,
-          icon: "\ue63b",
-          text: "发现音乐",
-          active: false,
-          routePath: "/found-music",
-          routeName: "FoundMusic"
-        },
-        {
-          id: 1,
-          icon: "\ue680",
-          text: "我的音乐",
-          active: false,
-          routePath: "/my-music",
-          routeName: "MyMusic"
-        },
-        {
-          id: 2,
-          icon: "\ue61a",
-          text: "朋友",
-          active: false,
-          routePath: "/music-share",
-          routeName: "MusicShare"
-        },
-        {
-          id: 3,
-          icon: "\ue618",
-          text: "账号",
-          active: false,
-          routePath: "/my-account",
-          routeName: "MyAccount"
-        }
-      ]
     };
   },
-  created() {
-    // console.log(this.currentPageID);
-    // for (let item of this.list) {
-    //   item.active = item.id === this.currentPageID;
-    // }
+  computed:{
+    list(){
+      return this.tabBarList;
+    }
   },
   methods: {
-    beActive(index,item) {
-      for (let item of this.list) {
-        item.active = false;
-      }
-      this.list[index].active = true;
+    beActive(index, item) {
       this.$router.push({
-        path:item.routePath,
-        name:item.routeName
-      })
+        path: item.routePath,
+        name: item.routeName
+      });
     }
   }
 };
@@ -85,7 +46,7 @@ export default {
 @import '~@/assets/MusicPlayback/play_icon'
 
 .icon
-  font-size .5rem
+  font-size 0.5rem
 
 .tabBar
   position fixed
@@ -93,15 +54,15 @@ export default {
   left 0
   width 100%
   height 1.2rem
-  padding-top .2rem
-  padding-bottom .1rem
+  padding-top 0.2rem
+  padding-bottom 0.1rem
   box-sizing border-box
   display flex
   background-color #f2f2f2
   z-index 999
 
 .item
-  font-size .28rem
+  font-size 0.28rem
   color black
   width 25%
   height 100%

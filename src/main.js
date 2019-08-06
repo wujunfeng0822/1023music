@@ -12,7 +12,7 @@ import 'swiper/dist/css/swiper.css'
 // animate.css
 import animated from 'animate.css'
 Vue.use(animated)
- 
+
 // or with options
 import VueLazyload from 'vue-lazyload'
 Vue.use(VueLazyload, {
@@ -20,7 +20,7 @@ Vue.use(VueLazyload, {
   error: require('./assets/img/err.jpg'),
   loading: require('./assets/img/loading.gif'),
   attempt: 1,
-  listenEvents:['scroll']
+  listenEvents: ['scroll']
 });
 
 // cubeUI Component
@@ -51,7 +51,16 @@ Vue.config.productionTip = false
 
 // 路由守卫：验证登录状态
 router.beforeEach((to, from, next) => {
-  // console.log("beforEach");
+
+  // 底部控制条变化
+  let tabBarList = store.state.tabBarList;
+  for (const item of tabBarList) {
+    item.active = false;
+    if (to.path.indexOf(item.routePath) > -1) {
+      item.active = true;
+    }
+  }
+  store.dispatch('update_tabBarList', { tabBarList });
 
   if (to.meta.requireAuth) {
     if (store.state.isLogin) {
